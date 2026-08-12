@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import calendar
 import html
 import json
 import re
@@ -101,6 +102,46 @@ def render_body(lines: tuple[str, ...]) -> str:
     return "\n".join(chunks)
 
 
+def render_calendars(reports: list[Report]) -> str:
+    report_days = {report.day for report in reports}
+    months = sorted({report.day[:7] for report in reports}, reverse=True)
+    month_names = ("一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月")
+    month_views: list[str] = []
+    for index, month in enumerate(months):
+        year, month_number = map(int, month.split("-"))
+        label = f"{year}年{month_names[month_number - 1]}"
+        cells: list[str] = []
+        for week in calendar.Calendar(firstweekday=0).monthdayscalendar(year, month_number):
+            for day_number in week:
+                if day_number == 0:
+                    cells.append('<span class="calendar-day is-blank" aria-hidden="true"></span>')
+                    continue
+                day = f"{month}-{day_number:02d}"
+                if day in report_days:
+                    cells.append(
+                        f'<a class="calendar-day has-log" href="#log-{day}" data-calendar-date="{day}" '
+                        f'aria-label="查看 {day} 日志">{day_number}</a>'
+                    )
+                else:
+                    cells.append(f'<span class="calendar-day is-empty" aria-label="{day} 无日志">{day_number}</span>')
+        hidden = "" if index == 0 else " hidden"
+        month_views.append(
+            f'<div class="calendar-month" data-calendar-month="{month}" data-calendar-label="{label}"{hidden}>'
+            f'<div class="calendar-grid">{"".join(cells)}</div></div>'
+        )
+
+    return f"""<section class="calendar" aria-labelledby="calendar-heading">
+  <div class="section-heading"><h2 id="calendar-heading">日期导航</h2><span>{len(reports)} 天</span></div>
+  <div class="calendar-toolbar">
+    <button type="button" data-calendar-prev aria-label="上一个月">←</button>
+    <strong data-calendar-title>{html.escape(month_views and f'{months[0][:4]}年{month_names[int(months[0][5:]) - 1]}' or '')}</strong>
+    <button type="button" data-calendar-next aria-label="下一个月">→</button>
+  </div>
+  <div class="calendar-weekdays" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+  {''.join(month_views)}
+</section>"""
+
+
 def page(title: str, body: str, *, description: str, depth: int = 0) -> str:
     prefix = "../" * depth
     return f"""<!doctype html>
@@ -111,6 +152,7 @@ def page(title: str, body: str, *, description: str, depth: int = 0) -> str:
   <meta name="description" content="{html.escape(description, quote=True)}">
   <meta name="theme-color" content="#fafafa">
   <title>{html.escape(title)}</title>
+  <link rel="icon" href="{prefix}assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="{prefix}assets/styles.css">
 </head>
 <body>
@@ -130,8 +172,9 @@ def build(reports: list[Report]) -> None:
 
     cards = []
     for report in reports:
-        cards.append(f"""<article class="report-card" data-report data-search-text="{html.escape(report.search_text, quote=True)}">
-  <time class="report-date" datetime="{report.day}">{report.day[5:]}<span>{report.day[:4]} · 22:00 CST</span></time>
+        cards.append(f"""<article class="report-card" id="log-{report.day}" data-report data-date="{report.day}" data-search-text="{html.escape(report.search_text, quote=True)}">
+  <div class="timeline-node" aria-hidden="true"></div>
+  <time class="report-date" datetime="{report.day}"><span>{report.day[:4]}</span>{report.day[5:]}</time>
   <div class="report-content">
     <h2 class="sr-only">{html.escape(report.day)} 更新</h2>
     {render_body(report.lines)}
@@ -154,17 +197,24 @@ def build(reports: list[Report]) -> None:
 
     newest = reports[0].day if reports else "暂无"
     oldest = reports[-1].day if reports else "暂无"
-    index_body = f"""<header class="site-header"><div class="shell">
-  <p class="eyebrow">Daily product change log</p>
-  <h1 class="site-title">Virae Logs</h1>
-  <p class="site-intro">把每天分散在前端、后端和 Bot 的代码变化，整理成使用者真正能感知的功能更新。</p>
-  <div class="meta-row"><span><strong>{len(reports)}</strong> 篇日报</span><span>{oldest} — {newest}</span><span>每日 22:00 CST 更新</span></div>
-</div></header>
-<main class="shell" id="main-content">
+    index_body = f"""<div class="app-shell">
+<aside class="sidebar">
+  <header class="site-header">
+    <p class="eyebrow">Daily product change log</p>
+    <h1 class="site-title">Virae Logs</h1>
+    <p class="site-intro">把分散在前端、后端与 Bot 的代码变化，整理成使用者真正能感知的功能更新。</p>
+    <div class="meta-row"><span><strong>{len(reports)}</strong> 篇日报</span><span>{oldest} — {newest}</span></div>
+  </header>
   <div class="toolbar"><label class="sr-only" for="log-search">搜索更新日志</label><input id="log-search" class="search" type="search" data-search placeholder="搜索功能、项目或日期…"></div>
+  {render_calendars(reports)}
+  <p class="update-note">每日 22:00 CST 更新</p>
+</aside>
+<main class="content" id="main-content">
+  <div class="content-heading"><p class="eyebrow">Timeline</p><h2>项目更新</h2></div>
   <section class="timeline" aria-label="更新日志">{''.join(cards)}</section>
   <p class="empty" data-empty hidden>没有找到匹配的日志。</p>
 </main>
+</div>
 <footer class="site-footer"><div class="shell">Virae.ai 项目变动总结 · 由 Codex 自动整理</div></footer>
 <script src="assets/app.js" defer></script>"""
     (OUTPUT / "index.html").write_text(
