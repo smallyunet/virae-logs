@@ -69,9 +69,8 @@ def render_body(lines: tuple[str, ...]) -> str:
     for raw in lines:
         line = raw.strip()
         if not line:
-            if in_list:
-                chunks.append("</ol>")
-                in_list = False
+            # Markdown commonly separates ordered-list items with blank lines.
+            # Keep the list open until a real block boundary appears.
             continue
         if line.startswith("## "):
             if in_list:
