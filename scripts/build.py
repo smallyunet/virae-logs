@@ -19,8 +19,22 @@ OUTPUT = ROOT / "_site"
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 ORDERED_RE = re.compile(r"^\s*\d+[.、]\s*(.+)$")
 COMMIT_LINK_RE = re.compile(
-    r"\[([0-9a-f]{7,8})\]\((https://github[.]com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/commit/[0-9a-f]{40})\)"
+    r"\[([0-9a-f]{7,8})\]\((https://github[.]com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/commit/[0-9a-f]{7,40})\)"
 )
+PROJECT_COMMIT_RE = re.compile(
+    r"(?<=[（；])(?P<project>poly-terminal|polybot-dashboard|polybot|predictdog_docs|predictdog_skill|virae_ai_skill|prediction-bridge)"
+    r"：(?P<references>[^；）]+)"
+)
+BARE_SHORT_HASH_RE = re.compile(r"(?<!\[)(?<![0-9a-f])([0-9a-f]{7,8})(?![0-9a-f])(?!\]\()")
+PROJECT_GITHUB_REPOS = {
+    "poly-terminal": "HQSV-Labs/poly-terminal",
+    "polybot-dashboard": "HQSV-Labs/polybot-dashboard",
+    "polybot": "HQSV-Labs/polybot",
+    "predictdog_docs": "HQSV-Labs/predictdog_docs",
+    "predictdog_skill": "HQSV-Labs/virae_ai_skill",
+    "virae_ai_skill": "HQSV-Labs/virae_ai_skill",
+    "prediction-bridge": "HQSV-Labs/prediction-bridge",
+}
 
 
 @dataclass(frozen=True)
@@ -49,7 +63,24 @@ def load_reports() -> list[Report]:
     return reports
 
 
+def add_direct_commit_links(text: str) -> str:
+    def link_project_references(match: re.Match[str]) -> str:
+        project = match.group("project")
+        github_repo = PROJECT_GITHUB_REPOS[project]
+        references = BARE_SHORT_HASH_RE.sub(
+            lambda hash_match: (
+                f"[{hash_match.group(1)}]"
+                f"(https://github.com/{github_repo}/commit/{hash_match.group(1)})"
+            ),
+            match.group("references"),
+        )
+        return f"{project}：{references}"
+
+    return PROJECT_COMMIT_RE.sub(link_project_references, text)
+
+
 def inline(text: str) -> str:
+    text = add_direct_commit_links(text)
     chunks: list[str] = []
     cursor = 0
     for match in COMMIT_LINK_RE.finditer(text):
