@@ -173,7 +173,6 @@ def build(reports: list[Report]) -> None:
     cards = []
     for report in reports:
         cards.append(f"""<article class="report-card" id="log-{report.day}" data-report data-date="{report.day}" data-search-text="{html.escape(report.search_text, quote=True)}">
-  <div class="timeline-node" aria-hidden="true"></div>
   <time class="report-date" datetime="{report.day}"><span>{report.day[:4]}</span>{report.day[5:]}</time>
   <div class="report-content">
     <h2 class="sr-only">{html.escape(report.day)} 更新</h2>
@@ -210,7 +209,7 @@ def build(reports: list[Report]) -> None:
   <p class="update-note">每日 22:00 CST 更新</p>
 </aside>
 <main class="content" id="main-content">
-  <div class="content-heading"><p class="eyebrow">Timeline</p><h2>项目更新</h2></div>
+  <div class="content-heading"><h2>项目更新</h2></div>
   <section class="timeline" aria-label="更新日志">{''.join(cards)}</section>
   <p class="empty" data-empty hidden>没有找到匹配的日志。</p>
 </main>

@@ -118,14 +118,9 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .update-note { margin: 12px 2px 0; color: var(--muted); font-size: 0.7rem; }
 
 .content { min-width: 0; }
-.content-heading { display: flex; align-items: baseline; justify-content: flex-start; gap: 14px; margin: 2px 0 22px; }
-.content-heading .eyebrow { margin: 0; }
+.content-heading { margin: 2px 0 22px; }
 .content-heading h2 { margin: 0; font-size: 1.1rem; letter-spacing: -0.025em; }
-.timeline { position: relative; display: grid; gap: 20px; padding: 0 0 56px 30px; }
-.timeline::before {
-  content: ""; position: absolute; left: 7px; top: 13px; bottom: 0; width: 1px;
-  background: linear-gradient(var(--accent), var(--line) 18%, var(--line) 88%, transparent);
-}
+.timeline { display: grid; gap: 20px; padding: 0 0 56px; }
 .report-card {
   position: relative;
   display: grid; grid-template-columns: 82px minmax(0, 1fr); gap: 22px;
@@ -137,12 +132,6 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .report-card:hover { border-color: color-mix(in srgb, var(--accent) 25%, var(--line)); box-shadow: var(--shadow); }
 .report-card.is-current { border-color: color-mix(in srgb, var(--accent) 46%, var(--line)); }
 .report-card[hidden] { display: none; }
-.timeline-node {
-  position: absolute; left: -29px; top: 28px; width: 13px; height: 13px;
-  border: 3px solid var(--bg); border-radius: 50%; background: var(--line);
-  box-shadow: 0 0 0 1px var(--line); transition: background 180ms ease, box-shadow 180ms ease;
-}
-.report-card.is-current .timeline-node { background: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 0 6px rgba(236,72,153,.10); }
 .report-date { color: var(--text); font-size: 0.91rem; font-variant-numeric: tabular-nums; font-weight: 720; letter-spacing: -0.02em; }
 .report-date span { display: block; color: var(--muted); font-size: 0.65rem; font-weight: 520; letter-spacing: 0.03em; }
 .report-content { min-width: 0; font-size: 0.92rem; }
@@ -182,9 +171,6 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   .site-intro { max-width: 34rem; }
   .calendar { margin-bottom: 32px; }
   .content-heading { margin-top: 0; }
-  .timeline { padding-left: 24px; }
-  .timeline::before { left: 5px; }
-  .timeline-node { left: -25px; }
   .report-card { padding: 20px 18px; }
 }
 
