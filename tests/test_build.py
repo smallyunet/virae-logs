@@ -22,11 +22,12 @@ class RenderBodyTests(unittest.TestCase):
         self.assertIn("</ol>\n<h3>后端</h3>\n<ol>", rendered)
 
     def test_plain_project_hashes_become_direct_github_links(self):
-        rendered = inline("（poly-terminal：abcdef12、1234567；polybot：89abcdef）")
+        rendered = inline("（poly-terminal：abcdef12、1234567；polybot：89abcdef；virae-strategy-core：40d4dda9）")
 
         self.assertIn('href="https://github.com/HQSV-Labs/poly-terminal/commit/abcdef12"', rendered)
         self.assertIn('href="https://github.com/HQSV-Labs/poly-terminal/commit/1234567"', rendered)
         self.assertIn('href="https://github.com/HQSV-Labs/polybot/commit/89abcdef"', rendered)
+        self.assertIn('href="https://github.com/Virae-Labs/virae-strategy-core/commit/40d4dda9"', rendered)
 
     def test_existing_full_commit_link_is_not_wrapped_again(self):
         rendered = inline(

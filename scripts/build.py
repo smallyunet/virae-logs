@@ -22,7 +22,7 @@ COMMIT_LINK_RE = re.compile(
     r"\[([0-9a-f]{7,8})\]\((https://github[.]com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/commit/[0-9a-f]{7,40})\)"
 )
 PROJECT_COMMIT_RE = re.compile(
-    r"(?<=[（；])(?P<project>poly-terminal|polybot-dashboard|polybot|predictdog_docs|predictdog_skill|virae_ai_skill|prediction-bridge)"
+    r"(?<=[（；])(?P<project>poly-terminal|polybot-dashboard|polybot|predictdog_docs|predictdog_skill|virae_ai_skill|virae-strategy-core|prediction-bridge)"
     r"：(?P<references>[^；）]+)"
 )
 BARE_SHORT_HASH_RE = re.compile(r"(?<!\[)(?<![0-9a-f])([0-9a-f]{7,8})(?![0-9a-f])(?!\]\()")
@@ -33,6 +33,7 @@ PROJECT_GITHUB_REPOS = {
     "predictdog_docs": "HQSV-Labs/predictdog_docs",
     "predictdog_skill": "HQSV-Labs/virae_ai_skill",
     "virae_ai_skill": "HQSV-Labs/virae_ai_skill",
+    "virae-strategy-core": "Virae-Labs/virae-strategy-core",
     "prediction-bridge": "HQSV-Labs/prediction-bridge",
 }
 
