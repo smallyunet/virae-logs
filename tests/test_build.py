@@ -24,9 +24,9 @@ class RenderBodyTests(unittest.TestCase):
     def test_plain_project_hashes_become_direct_github_links(self):
         rendered = inline("（poly-terminal：abcdef12、1234567；polybot：89abcdef；virae-strategy-core：40d4dda9）")
 
-        self.assertIn('href="https://github.com/HQSV-Labs/poly-terminal/commit/abcdef12"', rendered)
-        self.assertIn('href="https://github.com/HQSV-Labs/poly-terminal/commit/1234567"', rendered)
-        self.assertIn('href="https://github.com/HQSV-Labs/polybot/commit/89abcdef"', rendered)
+        self.assertIn('href="https://github.com/Virae-Labs/poly-terminal/commit/abcdef12"', rendered)
+        self.assertIn('href="https://github.com/Virae-Labs/poly-terminal/commit/1234567"', rendered)
+        self.assertIn('href="https://github.com/Virae-Labs/polybot/commit/89abcdef"', rendered)
         self.assertIn('href="https://github.com/Virae-Labs/virae-strategy-core/commit/40d4dda9"', rendered)
 
     def test_existing_full_commit_link_is_not_wrapped_again(self):
@@ -35,6 +35,14 @@ class RenderBodyTests(unittest.TestCase):
         )
 
         self.assertEqual(rendered.count("<a href="), 1)
+
+    def test_existing_short_commit_link_is_not_wrapped_again(self):
+        rendered = inline(
+            "（polybot：[abcdef12](https://github.com/Virae-Labs/polybot/commit/abcdef12)）"
+        )
+
+        self.assertEqual(rendered.count("<a href="), 1)
+        self.assertIn('href="https://github.com/Virae-Labs/polybot/commit/abcdef12"', rendered)
 
     def test_hash_outside_project_reference_stays_plain(self):
         self.assertEqual(inline("版本 abcdef12"), "版本 abcdef12")

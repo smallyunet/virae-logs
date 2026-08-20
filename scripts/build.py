@@ -27,9 +27,9 @@ PROJECT_COMMIT_RE = re.compile(
 )
 BARE_SHORT_HASH_RE = re.compile(r"(?<!\[)(?<![0-9a-f])([0-9a-f]{7,8})(?![0-9a-f])(?!\]\()")
 PROJECT_GITHUB_REPOS = {
-    "poly-terminal": "HQSV-Labs/poly-terminal",
-    "polybot-dashboard": "HQSV-Labs/polybot-dashboard",
-    "polybot": "HQSV-Labs/polybot",
+    "poly-terminal": "Virae-Labs/poly-terminal",
+    "polybot-dashboard": "Virae-Labs/polybot-dashboard",
+    "polybot": "Virae-Labs/polybot",
     "predictdog_docs": "HQSV-Labs/predictdog_docs",
     "predictdog_skill": "HQSV-Labs/virae_ai_skill",
     "virae_ai_skill": "HQSV-Labs/virae_ai_skill",
@@ -77,7 +77,14 @@ def add_direct_commit_links(text: str) -> str:
         )
         return f"{project}：{references}"
 
-    return PROJECT_COMMIT_RE.sub(link_project_references, text)
+    chunks: list[str] = []
+    cursor = 0
+    for existing_link in COMMIT_LINK_RE.finditer(text):
+        chunks.append(PROJECT_COMMIT_RE.sub(link_project_references, text[cursor:existing_link.start()]))
+        chunks.append(existing_link.group(0))
+        cursor = existing_link.end()
+    chunks.append(PROJECT_COMMIT_RE.sub(link_project_references, text[cursor:]))
+    return "".join(chunks)
 
 
 def inline(text: str) -> str:
